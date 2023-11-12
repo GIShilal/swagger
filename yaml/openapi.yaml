@@ -9,8 +9,8 @@ info:
   contact:
     email: hilaldzakwan08@gmail.com
   license:
-    name: Peda Package
-    url: https://pkg.go.dev/github.com/petapedia/peda
+    name: GCF Package
+    url: https://github.com/HilalDzakwan/backendgcf
   version: 1.0.11
 externalDocs:
   description: Repo GCF
@@ -22,34 +22,40 @@ tags:
     description: Data Geo Spasial
     externalDocs:
       description: Deskripsi dan Kode Program
-      url: https://petapedia.github.io/gcf/get/
+      url: https://github.com/HilalDzakwan/backendgcf
   - name: auth
     description: Auth to Access to API
     externalDocs:
       description: Deskripsi dan Kode Program
       url: https://petapedia.github.io/gcf/post/
-  - name: user
-    description: Get Token and Authorize
+  - name: data
+    description: Data Untuk akses GIS
+    externalDocs:
+      description: Deskripsi dan Kode Program
+      url: https://petapedia.github.io/gcf/post/
 paths:
-  /petapedia:
-    get:
+  /RegisterGis:
+    post:
       tags:
-        - data
-      summary: Get Data Geospasial
-      description: List Data Geospasial
-      operationId: getGeoJSON
+        - register
+      summary: Register User Without Token
+      description: Daftar Akun User
+      operationId: authService
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Peta'
-        '400':
-          description: Invalid status value
-  /petapedia-post:
+                $ref: '#/components/schemas/Response'
+        '405':
+          description: Invalid input
+  /login-gis:
     post:
       tags:
         - auth
@@ -70,38 +76,117 @@ paths:
                 $ref: '#/components/schemas/AuthResponse'
         '405':
           description: Invalid input
+  /UpdateGeo:
+    put:
+      tags:
+        - data
+      summary: Update data geo
+      description: Update data nama by volume geo
+      operationId: authService
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bodycord'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '405':
+          description: Invalid input          
       security:
-        - token:
-            - write:apiKey
-            - read:apiKey
+        - Login:
+          - write:apiKey
+          - read:apiKey
+
+  /GetAllGeo:
+    get:
+      tags:
+        - data
+      summary: Get Data Geojson
+      description: Header auth 
+      operationId: GetdataGeojson
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/responseUser'
+        '400':
+          description: Invalid status value
+      security:
+        - Login:
+          - write:apiKey
+          - read:apiKey
+
 components:
   schemas:
-    Peta:
+    user:
       type: object
       properties:
-        type:
+        username:
           type: string
-        geometry:
+          example : hilal
+        password:
+          type: string
+          example: hilal
+    Response:
+      type: object
+      properties:
+        status:
+          type: bool
+          example: true
+        message:
+          type: string
+          example: Berhasil Input data
+    responseUser:
+      type: object
+      properties:
+        status:
+          type: bool
+          example: true
+        message:
+          type: string
+          example: berhasil ambil data
+        data:
           type: object
           properties:
-            type: 
+            username:
               type: string
-            coordinates: 
-              type: array
-        properties:
-          type: object
-          properties:
-            name:
+              example: hilal
+            password:
               type: string
+              example: hash password
+            role:
+              type: string
+              example: user
     Auth:
       type: object
       properties:
         username:
           type: string
-          example: petped
+          example: hilal
         password:
           type: string
-          example: secret
+          example: hilal
+    bodycord:
+      type: object
+      properties:
+        type:
+          type: string
+          example: polygon
+        name:
+          type: string
+          example: hilal
+        volume:
+          type: string
+          example: "1"
     AuthResponse:
       type: object
       properties:
@@ -110,10 +195,10 @@ components:
           example: false
         message:
           type: string
-          example: fehguy
+          example: Selamat Datang
         token:
           type: string
-          example: fehguy
+          example: haris
   requestBodies:
     AuthReq:
       description: Request Authentication
@@ -130,7 +215,9 @@ components:
             items:
               $ref: '#/components/schemas/AuthResponse'
   securitySchemes:
-    token:
+    Login:
       type: apiKey
-      name: token
+      name: Login
       in: header
+
+      
